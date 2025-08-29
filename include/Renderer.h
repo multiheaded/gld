@@ -6,29 +6,32 @@
 #define GRIDLOCK_DEFENDERS_RENDERER_H
 
 #include <memory>
+#include <Event.h>
 
 namespace gld {
     template <class RendererIntegrationT>
     class Renderer {
     public:
-        using RenderTargetType = RendererIntegrationT::RenderTargetType;
         Renderer() = delete;
-        explicit Renderer(gld::Event::Broker &broker) : m_impl(broker), m_broker(broker) {
+        explicit Renderer(gld::Event::Broker &broker) : m_broker(broker) {
             broker.subscribe<gld::Event::Resized>([this](const gld::Event::Resized& val) {
-                    m_impl.resize(val.width, val.height);
+                    derived().resize(val.width, val.height);
                 });
         };
 
         void render() {
-            m_impl.render();
+            derived().render();
         }
 
-        const RenderTargetType& renderTarget() {
-            return m_impl.renderTarget();
+        const auto& renderTarget() {
+            return derived().renderTarget();
         }
 
-    private:
-        RendererIntegrationT m_impl;
+        constexpr RendererIntegrationT &derived() {
+            return static_cast<RendererIntegrationT &>(*this);
+        }
+
+    protected:
         gld::Event::Broker &m_broker;
     };
 }

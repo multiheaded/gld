@@ -5,6 +5,7 @@
 #ifndef GRIDLOCK_DEFENDERS_WINDOW_H
 #define GRIDLOCK_DEFENDERS_WINDOW_H
 
+#include <iostream>
 #include <memory>
 #include "Event.h"
 
@@ -12,22 +13,27 @@ namespace gld {
     template <class WindowIntegrationT>
     class Window {
     public:
-        Window(gld::Event::Broker &broker, unsigned int width, unsigned int height, const std::string &title)
-            : m_impl(broker, width, height, title) {
-
+        Window(gld::Event::Broker &broker, unsigned int, unsigned int, const std::string&)
+            : m_broker(broker)
+        {
+            std::cout << "Base Window created" << std::endl;
         }
 
         void process_events() {
-            m_impl.process_events();
+            derived().process_events();
         }
 
         template<typename RenderTargetT>
         void display(RenderTargetT &target) {
-            m_impl.display(target);
+            derived().display(target);
         }
 
-    private:
-        WindowIntegrationT m_impl;
+        constexpr WindowIntegrationT &derived() {
+            return static_cast<WindowIntegrationT &>(*this);
+        }
+
+    protected:
+        gld::Event::Broker &m_broker;
     };
 } // gld
 

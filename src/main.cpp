@@ -9,8 +9,8 @@
 
 int main() {
     gld::Event::Broker broker;
-    gld::Renderer<gld::integration::SFML::Renderer> renderer(broker);
-    gld::Window<gld::integration::SFML::Window> window(broker, 800, 600, "gld");
+    gld::integration::SFML::Renderer renderer(broker);
+    gld::integration::SFML::Window window(broker, 800, 600, "gld");
 
     gld::Game game(broker, window, renderer);
 
