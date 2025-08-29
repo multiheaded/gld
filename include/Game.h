@@ -25,6 +25,7 @@ namespace gld {
             m_running = true;
             while (m_running) {
                 m_wnd.process_events();
+                m_renderer.render();
                 m_wnd.display(m_renderer.renderTarget());
             }
         }
@@ -34,7 +35,7 @@ namespace gld {
         }
     private:
         bool m_running = false;
-        gld::Event::Broker &m_broker;;
+        gld::Event::Broker &m_broker;
         WindowT &m_wnd;
         RendererT &m_renderer;
     };

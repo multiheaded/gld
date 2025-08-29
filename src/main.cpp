@@ -15,6 +15,6 @@ int main() {
     gld::Game game(broker, window, renderer);
 
     game.run();
-    
+
     return 0;
 }

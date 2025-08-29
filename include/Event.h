@@ -18,9 +18,14 @@ namespace gld {
             std::uint32_t height;
         };
 
+        struct MouseMoved {
+            std::uint32_t x;
+            std::uint32_t y;
+        };
+
         struct Quit {};
 
-        using SubType = std::variant<Resized, Quit>;
+        using SubType = std::variant<Resized, MouseMoved, Quit>;
         using Broker = gld::Broker<Event::SubType>;
 
         template<typename ExplicitEventType>
