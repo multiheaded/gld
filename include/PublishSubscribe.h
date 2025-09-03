@@ -6,24 +6,24 @@
 #define GRIDLOCK_DEFENDERS_PUBLISHSUBSCRIBE_H
 #include <functional>
 #include <memory>
-#include <unordered_map>
 #include "TypeContainer.h"
 
 namespace gld {
-    template<typename ContainerT>
+    template<typename... EventTs>
     class Broker {
     private:
         template<typename T>
         struct Subscriber {
-            explicit Subscriber(std::function<void(const T&)> &&callback) : notify(std::move(callback)) {}
+            explicit Subscriber(std::function<void(const T&)> callback) : notify(std::move(callback)) {}
             std::function<void(const T&)> notify;
         };
     public:
+        using SubType = gld::TypeContainer::concat_t<EventTs...>;
 
         template<typename T, typename CallbackT>
         void subscribe(CallbackT &&callback) {
             using SubscriberVectorType = std::vector<std::unique_ptr<Subscriber<T>>>;
-            std::unique_ptr<Subscriber<T>> subscriber = std::make_unique<Subscriber<T>>(std::forward<decltype(callback)>(callback));
+            std::unique_ptr<Subscriber<T>> subscriber = std::make_unique<Subscriber<T>>(std::forward<CallbackT>(callback));
             std::get<SubscriberVectorType>(m_subscribers).push_back(std::move(subscriber));
         }
 
@@ -44,7 +44,7 @@ namespace gld {
         };
 
         // map type index to subscribers via tuple:
-        typename type_map<ContainerT>::type m_subscribers;
+        typename type_map<SubType>::type m_subscribers;
     };
 
 

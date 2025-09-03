@@ -10,19 +10,29 @@ FetchContent_Declare(SFML
         GIT_REPOSITORY https://github.com/SFML/SFML.git
         GIT_TAG 3.0.1
         GIT_SHALLOW ON
-        EXCLUDE_FROM_ALL
         SYSTEM)
 FetchContent_MakeAvailable(SFML)
+
+FetchContent_Declare(archon
+        GIT_REPOSITORY https://github.com/janreitz/archon.git
+        GIT_TAG main
+        GIT_SHALLOW ON)
+FetchContent_MakeAvailable(archon)
+
+find_package (Eigen3 3.3 REQUIRED NO_MODULE)
 
 add_executable(gridlock_defenders src/main.cpp
         src/Game.cpp
         src/integration/SFML/Renderer.cpp
         src/integration/SFML/Window.cpp
+        include/Components.h
+        include/Sprite.h
 )
 
 target_include_directories(gridlock_defenders PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_link_libraries(gridlock_defenders PRIVATE SFML::Window SFML::Graphics)
+target_link_libraries(gridlock_defenders PRIVATE SFML::Window SFML::Graphics archon Eigen3::Eigen)
 
+#[[
 target_compile_options(gridlock_defenders PRIVATE
     -Wall                    # Enable most warning messages
     -Wextra                  # Enable extra warning messages
@@ -45,4 +55,4 @@ target_compile_options(gridlock_defenders PRIVATE
     $<$<CXX_COMPILER_ID:GNU>:-Wduplicated-branches>
     $<$<CXX_COMPILER_ID:GNU>:-Wlogical-op>
     $<$<CXX_COMPILER_ID:GNU>:-Wuseless-cast>
-)
+)]]

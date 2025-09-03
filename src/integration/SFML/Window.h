@@ -14,9 +14,9 @@
 namespace gld::integration::SFML {
     class Window : public gld::Window<gld::integration::SFML::Window> {
     public:
-        Window(gld::Event::Broker &broker, unsigned int width, unsigned int height, const std::string &title);
+        Window(gld::EventBroker &broker, unsigned int width, unsigned int height, const std::string &title);
 
-        void process_events();
+        [[nodiscard]] std::optional<gld::UIEvent> query_event();
 
         template<typename RenderTargetT>
         void display(const RenderTargetT &target);

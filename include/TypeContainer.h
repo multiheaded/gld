@@ -20,6 +20,43 @@ namespace gld {
         template<typename Container, typename T>
         inline constexpr bool contains_v = contains_traits::contains<Container, T>::value;
 
+        namespace concat_traits {
+            template<typename C1, typename C2>
+            struct concat_two;
+
+            template<template<typename...> typename C1, template<typename...> typename C2, typename... T1s, typename... T2s>
+            struct concat_two<C1<T1s...>, C2<T2s...>> {
+                using type = C1<T1s..., T2s...>;
+            };
+
+            template<typename C1, typename C2>
+            using concat_two_t = typename concat_two<C1, C2>::type;
+
+            template<typename... Cs>
+            struct concat_n;
+
+            template<typename C>
+            struct concat_n<C> {
+                using type = C;
+            };
+
+            template<typename C1, typename C2, typename... CRest>
+            struct concat_n<C1, C2, CRest...> {
+                using type = typename concat_n<concat_two_t<C1, C2>, CRest...>::type;
+            };
+        }
+
+        template<typename... Container>
+        using concat_t = typename concat_traits::concat_n<Container...>::type;
+
+        namespace test {
+            using C1 = std::tuple<int, float>;
+            using C2 = std::tuple<long, double>;
+            using C3 = std::tuple<bool>;
+            static_assert(std::is_same_v<concat_t<C1,C2>, std::tuple<int, float, long, double>> == true);
+            static_assert(std::is_same_v<concat_t<C1,C2,C3>, std::tuple<int, float, long, double, bool>> == true);
+        }
+
         namespace unique_traits {
             template<typename T, typename... Ps>
             struct unique;

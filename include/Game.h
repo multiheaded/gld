@@ -5,28 +5,30 @@
 #ifndef GRIDLOCK_DEFENDERS_GAME_H
 #define GRIDLOCK_DEFENDERS_GAME_H
 
-#include <Renderer.h>
-#include <Window.h>
 #include "Event.h"
-
+#include "Components.h"
+#include <archon/ecs.h>
 
 namespace gld {
-    template <typename WindowIntegrationT, typename RendererIntegrationT>
     class Game {
     public:
-        Game(gld::Event::Broker &broker, gld::Window<WindowIntegrationT> &wnd, gld::Renderer<RendererIntegrationT> &renderer)
+        Game(gld::EventBroker &broker, ecs::World &world)
             : m_broker(broker)
-            , m_wnd(wnd)
-            , m_renderer(renderer) {
-            broker.subscribe<gld::Event::Quit>([this](const gld::Event::Quit&){quit();});
+            , m_world(world)
+        {
+            broker.subscribe<gld::Quit>([this](const gld::Quit&) {
+                quit();
+            });
         }
 
         void run() {
             m_running = true;
             while (m_running) {
-                m_wnd.process_events();
-                m_renderer.render();
-                m_wnd.display(m_renderer.renderTarget());
+                m_broker.publish(gld::ProcessUserInterfaceEvents{});
+                m_broker.publish(gld::BeginRenderPass{});
+                m_broker.publish(gld::Render{});
+                m_broker.publish(gld::EndRenderPass{});
+                m_broker.publish(gld::PresentFrame{});
             }
         }
 
@@ -35,9 +37,29 @@ namespace gld {
         }
     private:
         bool m_running = false;
-        gld::Event::Broker &m_broker;
-        gld::Window<WindowIntegrationT> &m_wnd;
-        gld::Renderer<RendererIntegrationT> &m_renderer;
+        gld::EventBroker &m_broker;
+        ecs::World &m_world;
+
+        void add_spawn_point(gld::Position pos) {
+            auto entity = m_world.create_entity();
+            m_world.add_components(entity, gld::SpawnPoint{}, pos);
+        }
+
+        void build_tower(gld::Position pos) {
+            auto entity = m_world.create_entity();
+            m_world.add_components(entity, gld::Tower{}, pos);
+        }
+
+        void spawn_creep(gld::Position pos, gld::Velocity vel, gld::Health health) {
+            auto entity = m_world.create_entity();
+            m_world.add_components(entity, gld::Creep{}, pos, vel, health);
+        }
+
+        void move_creeps() {
+            ecs::Query<gld::Creep, gld::Position, gld::Velocity>().each(m_world, [](gld::Creep&, gld::Position& pos, gld::Velocity& vel) {
+                pos.p += vel.v;
+            });
+        }
     };
 } // gld
 

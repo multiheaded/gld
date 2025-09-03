@@ -13,14 +13,22 @@ namespace gld {
     template <class WindowIntegrationT>
     class Window {
     public:
-        Window(gld::Event::Broker &broker, unsigned int, unsigned int, const std::string&)
+        Window(gld::EventBroker &broker, unsigned int, unsigned int, const std::string&)
             : m_broker(broker)
         {
-            std::cout << "Base Window created" << std::endl;
+            broker.subscribe<gld::ProcessUserInterfaceEvents>([this](const auto&) {
+                process_events();
+            });
         }
 
         void process_events() {
-            derived().process_events();
+            while (std::optional event = derived().query_event() ) {
+                gld::UIEvent ev = event.value();
+                auto visitor = [this](auto v) {
+                        m_broker.publish(v);
+                    };
+                ev.visit(visitor);
+            }
         }
 
         template<typename RenderTargetT>
@@ -33,7 +41,7 @@ namespace gld {
         }
 
     protected:
-        gld::Event::Broker &m_broker;
+        gld::EventBroker &m_broker;
     };
 } // gld
 
