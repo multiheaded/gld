@@ -1,10 +1,7 @@
-//
-// Created by marc on 01.09.25.
-//
-
 #ifndef GRIDLOCK_DEFENDERS_COMPONENTS_H
 #define GRIDLOCK_DEFENDERS_COMPONENTS_H
-#include <Eigen/Core>
+#include <gld.h>
+#include <memory>
 #include "archon/ecs.h"
 #include "Sprite.h"
 
@@ -20,11 +17,11 @@ namespace gld {
     struct Tower {};
 
     struct Position {
-        Eigen::Vector2f p;
+        gld::Vector2f p;
     };
 
     struct Velocity {
-        Eigen::Vector2f v;
+        gld::Vector2f v;
     };
 
     struct Health {
@@ -35,7 +32,20 @@ namespace gld {
         Sprite sprite;
     };
 
+    struct Animated {
+        gld::AnimationState state;
+    };
+
     struct Cursor{};
+
+    namespace Draworder {
+        struct Background{};
+        struct Battlefield{};
+        struct Assets{};
+        struct UI{};
+    }
+
+    void register_components();
 }
 
 #endif //GRIDLOCK_DEFENDERS_COMPONENTS_H

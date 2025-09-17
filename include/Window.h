@@ -1,7 +1,3 @@
-//
-// Created by marc on 27.08.25.
-//
-
 #ifndef GRIDLOCK_DEFENDERS_WINDOW_H
 #define GRIDLOCK_DEFENDERS_WINDOW_H
 

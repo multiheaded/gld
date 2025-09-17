@@ -1,30 +1,24 @@
-//
-// Created by marc on 28.08.25.
-//
-
 #ifndef GRIDLOCK_DEFENDERS_GAME_H
 #define GRIDLOCK_DEFENDERS_GAME_H
 
-#include "Event.h"
-#include "Components.h"
+#include <Event.h>
+#include <Components.h>
 #include <archon/ecs.h>
+#include <Battlefield.h>
+#include <AssetManager.h>
 
 namespace gld {
     class Game {
     public:
-        Game(gld::EventBroker &broker, ecs::World &world)
-            : m_broker(broker)
-            , m_world(world)
-        {
-            broker.subscribe<gld::Quit>([this](const gld::Quit&) {
-                quit();
-            });
-        }
+        Game(gld::EventBroker &broker, ecs::World &world, gld::AssetManager &assetManager);
 
         void run() {
             m_running = true;
             while (m_running) {
+                m_broker.process();
+
                 m_broker.publish(gld::ProcessUserInterfaceEvents{});
+                m_broker.publish(gld::UpdateAnimation{});
                 m_broker.publish(gld::BeginRenderPass{});
                 m_broker.publish(gld::Render{});
                 m_broker.publish(gld::EndRenderPass{});
@@ -39,6 +33,8 @@ namespace gld {
         bool m_running = false;
         gld::EventBroker &m_broker;
         ecs::World &m_world;
+        gld::AssetManager &m_assetManager;
+        gld::Battlefield m_battlefield;
 
         void add_spawn_point(gld::Position pos) {
             auto entity = m_world.create_entity();

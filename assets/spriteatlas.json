@@ -1,0 +1,77 @@
+{
+  "sprites": [
+    {
+      "name": "blob",
+      "size": {
+        "width": 60,
+        "height": 60
+      },
+      "variants": [
+        {
+          "name": "standing",
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "horizontal",
+          "frame count": 1,
+          "duration": 1.0
+        },
+        {
+          "name": "moving",
+          "origin": {
+            "x": 0,
+            "y": 0
+          },
+          "direction": "horizontal",
+          "frame count": 7,
+          "duration": 0.5
+        }
+      ]
+    },
+    {
+      "name": "cursor2",
+      "size": {
+        "width": 60,
+        "height": 60
+      },
+      "variants": [
+        {
+          "name": "animated",
+          "origin": {
+            "x": 0,
+            "y": 60
+          },
+          "direction": "horizontal",
+          "frame count": 5,
+          "duration": 0.6
+
+        }
+      ]
+    },
+    {
+      "name": "cursor",
+      "size": {
+        "width": 60,
+        "height": 60
+      },
+      "center": {
+        "x": 6,
+        "y": 4
+      },
+      "variants": [
+        {
+          "name": "animated",
+          "origin": {
+            "x": 0,
+            "y": 120
+          },
+          "direction": "horizontal",
+          "frame count": 12,
+          "duration": 2.0
+
+        }
+      ]
+    }
+  ]
+}

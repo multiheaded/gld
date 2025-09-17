@@ -5,11 +5,11 @@
 #ifndef GRIDLOCK_DEFENDERS_SFML_RENDERER_H
 #define GRIDLOCK_DEFENDERS_SFML_RENDERER_H
 
-#include <Eigen/Core>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <Event.h>
 #include <Renderer.h>
 #include <Sprite.h>
+#include <Texture.h>
 
 
 namespace gld::integration::SFML {
@@ -17,17 +17,18 @@ namespace gld::integration::SFML {
     public:
         explicit Renderer(gld::EventBroker &broker);
 
-        void resize(std::uint32_t width, std::uint32_t height);
+        void resize(const gld::Vector2u &to_size);
+        void zoom(const gld::Vector2f &to_size);
 
         void clear();
         void finish();
 
-        void draw(const gld::Sprite &s, const Eigen::Vector2f &p);
+        void draw(const gld::Sprite &s, const gld::Vector2f &p);
 
-        Eigen::Vector2i un_project(Eigen::Vector2f p);
-        Eigen::Vector2f project(Eigen::Vector2i p);
+        gld::Vector2u un_project(const gld::Vector2f &p) const;
+        gld::Vector2f project(const gld::Vector2u &p) const;
 
-        gld::Sprite make_sprite(const std::string &filename);
+        std::optional<gld::Texture> make_texture(const std::filesystem::path &filename);
 
         const sf::Texture &renderTarget() const;
 
@@ -35,8 +36,9 @@ namespace gld::integration::SFML {
         sf::RenderTexture m_renderTgt;
         sf::View m_view;
         std::vector<sf::Texture> m_textures;
+        gld::Vector2f m_zoomTo;
 
-        void update_view(float width, float height);
+        void update_view(const gld::Vector2f &size);
     };
 } // gld::integration::SFML
 

@@ -1,0 +1,19 @@
+{
+  "textures": [
+    {
+      "name": "battlefield",
+      "path": "battlefield.png"
+    },
+    {
+      "name": "spriteatlastexture",
+      "path": "spriteatlas.png"
+    }
+  ],
+  "atlases": [
+    {
+      "name": "animations",
+      "path": "spriteatlas.json",
+      "texture": "spriteatlastexture"
+    }
+  ]
+}

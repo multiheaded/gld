@@ -1,32 +1,27 @@
-//
-// Created by marc on 28.08.25.
-//
-
 #ifndef GRIDLOCK_DEFENDERS_EVENT_H
 #define GRIDLOCK_DEFENDERS_EVENT_H
-#include <cstdint>
 #include <variant>
 #include <optional>
-#include <Eigen/Core>
 
-#include "TypeContainer.h"
+#include "ConcurrentQueue.h"
+#include "gld.h"
 #include "PublishSubscribe.h"
+#include "TypeContainer.h"
 
 namespace gld {
     template<typename... Es>
     struct Event;
 
     struct Resized {
-        std::uint32_t width;
-        std::uint32_t height;
+        gld::Vector2u size;
     };
 
     struct MouseMoved {
-        Eigen::Vector2i p;
+        gld::Vector2u p;
     };
 
     struct MouseMovedProjected {
-        Eigen::Vector2f p;
+        gld::Vector2f p;
     };
 
     struct Quit {};
@@ -34,6 +29,10 @@ namespace gld {
     struct ProcessUserInterfaceEvents {};
 
     using UIEvent = gld::Event<Resized, MouseMoved, MouseMovedProjected, Quit, ProcessUserInterfaceEvents>;
+
+    struct UpdateAnimation {};
+
+    using AnimationEvent = gld::Event<UpdateAnimation>;
 
     struct BeginRenderPass {
     };
@@ -47,32 +46,37 @@ namespace gld {
     struct PresentFrame {
     };
 
-    using RenderEvent = gld::Event<BeginRenderPass, Render, EndRenderPass, PresentFrame>;
+    struct ViewZoomToFit {
+        gld::Vector2f viewSize;
+    };
 
-    using EventBroker = gld::Broker<UIEvent, RenderEvent>;
+    using RenderEvent = gld::Event<BeginRenderPass, Render, EndRenderPass, PresentFrame, ViewZoomToFit>;
+
+    using Events = gld::TypeContainer::concat_t<UIEvent, RenderEvent, AnimationEvent>;
+
+    using EventBroker = gld::Broker<Events>;
+
+    using EventQueue = gld::ConcurrentQueue<Events>;
 
     template<typename... Es>
     struct Event {
     public:
         using SubType = std::variant<Es...>;
 
-        using Broker = gld::Broker<Event::SubType>;
-
         template<typename ExplicitEventType>
-        explicit Event(const ExplicitEventType &event)
-            : m_actualEvent(event)
-            , m_subTypeIndex(gld::TypeContainer::index_of_v<SubType, ExplicitEventType>) {
+        explicit constexpr Event(const ExplicitEventType &event)
+            : m_actualEvent(event) {
         }
 
         template<typename ExplicitEventType>
         constexpr bool is() {
-            return (m_subTypeIndex == gld::TypeContainer::index_of_v<SubType, ExplicitEventType>());
+            return (std::holds_alternative<ExplicitEventType>(m_actualEvent));
         }
 
         template<typename ExplicitEventType>
         constexpr std::optional<ExplicitEventType> as() {
-            if constexpr (is<ExplicitEventType>()) {
-                return std::optional<ExplicitEventType>(m_actualEvent);
+            if constexpr (std::holds_alternative<ExplicitEventType>(m_actualEvent)) {
+                return std::optional<ExplicitEventType>(std::get<ExplicitEventType>(m_actualEvent));
             } else {
                 return std::nullopt;
             }
@@ -85,7 +89,6 @@ namespace gld {
 
     private:
         SubType m_actualEvent;
-        std::size_t m_subTypeIndex;
     };
 } // gld
 

@@ -1,7 +1,3 @@
-//
-// Created by marc on 28.08.25.
-//
-
 #ifndef GRIDLOCK_DEFENDERS_RENDERER_H
 #define GRIDLOCK_DEFENDERS_RENDERER_H
 
@@ -15,10 +11,10 @@ namespace gld {
         Renderer() = delete;
         explicit Renderer(gld::EventBroker &broker) : m_broker(broker) {
             broker.subscribe<gld::Resized>([this](const gld::Resized& val) {
-                    derived().resize(val.width, val.height);
+                    derived().resize(val.size);
                 });
             broker.subscribe<gld::MouseMoved>([this](const gld::MouseMoved& val) {
-                Eigen::Vector2f projected = derived().project(val.p);
+                gld::Vector2f projected = derived().project(val.p);
                 m_broker.publish(gld::MouseMovedProjected{
                     projected
                 });
@@ -28,6 +24,9 @@ namespace gld {
             });
             broker.subscribe<gld::EndRenderPass>([this](const auto&) {
                 end_render_pass();
+            });
+            broker.subscribe<gld::ViewZoomToFit>([this](const gld::ViewZoomToFit& val) {
+                zoom(val.viewSize);
             });
         };
 
@@ -39,12 +38,12 @@ namespace gld {
             derived().finish();
         }
 
-        void draw(const gld::Sprite &s, const Eigen::Vector2f &p) {
-            derived().draw(s, p);
+        void zoom(gld::Vector2f to_size) {
+            derived().zoom(to_size);
         }
 
-        gld::Sprite make_sprite() {
-            return derived().make_sprite();
+        void draw(const gld::Sprite &s, const gld::Vector2f &p) {
+            derived().draw(s, p);
         }
 
         const auto& renderTarget() {

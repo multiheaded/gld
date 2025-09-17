@@ -12,11 +12,12 @@ namespace gld::integration::SFML {
     Window::Window(gld::EventBroker &broker, unsigned int width, unsigned int height,
                    const std::string &title)
         : gld::Window<gld::integration::SFML::Window>(broker, width, height, title)
-        , m_window(sf::VideoMode({width, height}), title) {
+          , m_window(sf::VideoMode({width, height}), title) {
+        m_window.setMouseCursorVisible(false);
     }
 
     std::optional<gld::UIEvent> Window::query_event() {
-        if ( const std::optional event = m_window.pollEvent() ) {
+        if (const std::optional event = m_window.pollEvent()) {
             if (event->is<sf::Event::Closed>()) {
                 m_window.close();
                 return gld::UIEvent(gld::Quit{});
@@ -27,13 +28,15 @@ namespace gld::integration::SFML {
                                                         })));
                 return gld::UIEvent(gld::Resized
                     {
-                        static_cast<std::uint32_t>(resized->size.x),
-                        static_cast<std::uint32_t>(resized->size.y)
+                        .size{
+                            static_cast<std::uint32_t>(resized->size.x),
+                            static_cast<std::uint32_t>(resized->size.y)
+                        }
                     });
             } else if (const auto *mousePos = event->getIf<sf::Event::MouseMoved>()) {
                 return gld::UIEvent(gld::MouseMoved
                     {
-                        Eigen::Vector2i(
+                        gld::Vector2u(
                             static_cast<std::uint32_t>(mousePos->position.x),
                             static_cast<std::uint32_t>(mousePos->position.y)
                         )
