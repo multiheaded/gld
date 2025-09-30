@@ -9,7 +9,10 @@
 #include <chrono>
 #include "AssetManager.h"
 #include "UI.h"
-#include "ConcurrentQueue.h"
+#include <functional>
+#include <iomanip>
+
+#include "Scheduler.h"
 
 template<typename RendererIntegrationT, typename WindowIntegrationT>
 void setup_frame_presentation(gld::EventBroker &broker, gld::Renderer<RendererIntegrationT> &renderer, gld::Window<WindowIntegrationT> &window);
@@ -24,9 +27,21 @@ int main() {
     ecs::World world;
     gld::register_components();
     gld::EventBroker broker;
+    gld::Scheduler scheduler(broker);
+    int cnt_200ms = 0;
+    int cnt_500ms = 0;
+    int cnt_1000ms = 0;
+    auto task_200ms = [&cnt_200ms]() {
+        std::cout << cnt_200ms++ << " 200ms\n";
+    };
+    auto task_1000ms = [&cnt_1000ms]() {
+        std::cout << cnt_1000ms++ << " 1000ms\n";
+    };
+    scheduler.emplace(task_1000ms, std::chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1100));
+    scheduler.emplace(task_200ms, std::chrono::milliseconds(200));
     gld::integration::SFML::Renderer renderer(broker);
     gld::integration::SFML::Window window(broker, 800, 600, "gld");
-
     gld::AssetManager assetManager(
         "../../assets/",
         "catalog.json",

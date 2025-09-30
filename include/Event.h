@@ -3,7 +3,6 @@
 #include <variant>
 #include <optional>
 
-#include "ConcurrentQueue.h"
 #include "gld.h"
 #include "PublishSubscribe.h"
 #include "TypeContainer.h"
@@ -52,11 +51,21 @@ namespace gld {
 
     using RenderEvent = gld::Event<BeginRenderPass, Render, EndRenderPass, PresentFrame, ViewZoomToFit>;
 
-    using Events = gld::TypeContainer::concat_t<UIEvent, RenderEvent, AnimationEvent>;
+    struct ExecuteTask {
+        std::function<void()> run;
+    };
+
+    struct TestCounter {
+        int i;
+        std::thread::id thread;
+    };
+
+    using SchedulerEvent = gld::Event<ExecuteTask,TestCounter>;
+
+    using Events = gld::TypeContainer::concat_t<UIEvent, RenderEvent, AnimationEvent, SchedulerEvent>;
 
     using EventBroker = gld::Broker<Events>;
 
-    using EventQueue = gld::ConcurrentQueue<Events>;
 
     template<typename... Es>
     struct Event {
